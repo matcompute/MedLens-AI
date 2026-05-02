@@ -1,0 +1,32 @@
+# Environment
+.env
+*.db
+
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Uploads & Outputs
+backend/uploads/*
+backend/gradcam_outputs/*
+!backend/uploads/.gitkeep
+!backend/gradcam_outputs/.gitkeep
+
+# Node
+node_modules/
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
