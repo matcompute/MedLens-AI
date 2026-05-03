@@ -6,6 +6,7 @@ differential diagnoses, and full diagnostic reports.
 """
 
 import json
+import re
 from datetime import datetime, timezone
 from typing import Dict, Any
 from google import genai
@@ -79,11 +80,16 @@ IMPORTANT:
     try:
         text = _generate(prompt)
         text = text.strip()
+        # Strip code fences
         if text.startswith("```"):
             text = text.split("\n", 1)[1]
         if text.endswith("```"):
             text = text.rsplit("```", 1)[0]
         text = text.replace("```json", "").replace("```", "").strip()
+        # Remove ALL control characters (tabs, newlines inside strings, etc.)
+        text = re.sub(r'[\x00-\x1f\x7f]', ' ', text)
+        # Collapse multiple spaces
+        text = re.sub(r'  +', ' ', text)
         return json.loads(text)
     except (json.JSONDecodeError, Exception) as e:
         return {

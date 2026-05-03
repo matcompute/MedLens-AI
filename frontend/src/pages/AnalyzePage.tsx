@@ -18,10 +18,17 @@ export default function AnalyzePage() {
   const [caseId, setCaseId] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // Patient info
+  const [patientId, setPatientId] = useState('');
+  const [patientAge, setPatientAge] = useState('');
+  const [patientGender, setPatientGender] = useState('');
+  const [chiefComplaint, setChiefComplaint] = useState('');
+  const [clinicalNotes, setClinicalNotes] = useState('');
+
   const moduleInfo: Record<string, { label: string; icon: string; desc: string }> = {
-    chest_xray: { label: 'Chest X-Ray', icon: '🫁', desc: 'Pneumonia, Cardiomegaly, Pleural Effusion' },
-    skin_lesion: { label: 'Skin Lesion', icon: '🔍', desc: 'Melanoma, BCC, Benign Keratosis' },
-    retinal: { label: 'Retinal Scan', icon: '👁', desc: 'Diabetic Retinopathy grading' },
+    chest_xray: { label: 'Chest X-Ray', icon: '\u{1FAC1}', desc: 'Pneumonia, Cardiomegaly, Pleural Effusion' },
+    skin_lesion: { label: 'Skin Lesion', icon: '\u{1F50D}', desc: 'Melanoma, BCC, Benign Keratosis' },
+    retinal: { label: 'Retinal Scan', icon: '\u{1F441}', desc: 'Diabetic Retinopathy grading' },
   };
 
   const handleFile = (f: File) => {
@@ -41,10 +48,13 @@ export default function AnalyzePage() {
     setStep('analyzing'); setError('');
 
     try {
-      // Create a quick case
+      // Create case with patient info
       const caseRes = await api.post('/cases', {
-        patient_id: `PT-${Date.now().toString(36).toUpperCase()}`,
-        chief_complaint: `${moduleInfo[imageType].label} analysis`,
+        patient_id: patientId || `PT-${Date.now().toString(36).toUpperCase()}`,
+        patient_age: patientAge ? parseInt(patientAge) : null,
+        patient_gender: patientGender || null,
+        chief_complaint: chiefComplaint || `${moduleInfo[imageType].label} analysis`,
+        clinical_notes: clinicalNotes || null,
       });
       const cId = caseRes.data.id;
       setCaseId(cId);
@@ -67,6 +77,8 @@ export default function AnalyzePage() {
 
   const handleReset = () => {
     setStep('upload'); setFile(null); setPreview(''); setResult(null); setError('');
+    setPatientId(''); setPatientAge(''); setPatientGender('');
+    setChiefComplaint(''); setClinicalNotes('');
   };
 
   return (
@@ -94,8 +106,44 @@ export default function AnalyzePage() {
             ))}
           </div>
 
+          {/* Patient Information */}
+          <div className="card" style={{ marginBottom: '24px' }}>
+            <h3 className="card-title" style={{ marginBottom: '16px' }}>Patient Information</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+              <div className="form-group">
+                <label>Patient ID</label>
+                <input value={patientId} onChange={e => setPatientId(e.target.value)}
+                  placeholder="PT-001 (auto-generated if empty)" />
+              </div>
+              <div className="form-group">
+                <label>Age</label>
+                <input type="number" value={patientAge} onChange={e => setPatientAge(e.target.value)}
+                  placeholder="e.g. 45" />
+              </div>
+              <div className="form-group">
+                <label>Gender</label>
+                <select value={patientGender} onChange={e => setPatientGender(e.target.value)}>
+                  <option value="">Select gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div className="form-group">
+              <label>Chief Complaint</label>
+              <input value={chiefComplaint} onChange={e => setChiefComplaint(e.target.value)}
+                placeholder="e.g. Persistent cough, shortness of breath for 5 days" />
+            </div>
+            <div className="form-group">
+              <label>Clinical Notes (optional)</label>
+              <textarea rows={2} value={clinicalNotes} onChange={e => setClinicalNotes(e.target.value)}
+                placeholder="Additional observations, history, medications..." />
+            </div>
+          </div>
+
           {/* Upload zone */}
-          <div className={`upload-zone ${file ? '' : ''}`}
+          <div className={`upload-zone`}
             onDrop={handleDrop} onDragOver={e => e.preventDefault()}
             onClick={() => fileRef.current?.click()}>
             <input ref={fileRef} type="file" accept="image/*" hidden onChange={e => {
@@ -111,7 +159,7 @@ export default function AnalyzePage() {
               <div>
                 <div className="upload-icon">📤</div>
                 <div className="upload-text">Drop a medical image here or click to browse</div>
-                <div className="upload-hint">Supports JPEG, PNG, DICOM preview — Max 10MB</div>
+                <div className="upload-hint">Supports JPEG, PNG — Max 10MB</div>
               </div>
             )}
           </div>
@@ -160,6 +208,7 @@ export default function AnalyzePage() {
                 </div>
                 <div style={{ color: 'var(--text-secondary)', fontSize: '14px', marginTop: '4px' }}>
                   Model: {result.model_name} | Processing: {result.processing_time_ms}ms
+                  {patientId && <> | Patient: {patientId}</>}
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>

@@ -82,7 +82,7 @@ def upload_image(
 
 
 @router.get("/{case_id}/images/{image_id}/file")
-def get_image_file(case_id: int, image_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_image_file(case_id: int, image_id: int, db: Session = Depends(get_db)):
     img = db.query(MedicalImage).filter(MedicalImage.id == image_id, MedicalImage.case_id == case_id).first()
     if not img:
         raise HTTPException(status_code=404, detail="Image not found")
