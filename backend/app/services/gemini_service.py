@@ -58,11 +58,11 @@ def interpret_analysis(
     prompt = f"""You are a senior radiologist and diagnostician providing clinical decision support.
 An AI screening system has analyzed a {exam_type} image and produced the following classification results.
 
-Provide your clinical interpretation as a JSON object with these exact keys (no markdown, no code fences):
+Provide your clinical interpretation as a JSON object with these exact keys (no markdown, no code fences). The values MUST be simple text strings, NOT lists or objects:
 {{
     "clinical_summary": "2-3 paragraph clinical interpretation of the AI findings in professional medical language. Reference the confidence scores and what the finding means clinically.",
-    "differential_diagnosis": "List of 3-5 differential diagnoses to consider, ordered by likelihood, with brief clinical reasoning for each.",
-    "recommendations": "Specific next steps: additional imaging, lab tests, specialist referral, or follow-up timeline."
+    "differential_diagnosis": "List of 3-5 differential diagnoses to consider, ordered by likelihood, with brief clinical reasoning for each. Format as a single paragraph string.",
+    "recommendations": "Specific next steps: additional imaging, lab tests, specialist referral, or follow-up timeline. Format as a single paragraph string."
 }}
 
 AI Classification Results:

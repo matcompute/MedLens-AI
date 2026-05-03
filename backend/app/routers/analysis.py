@@ -76,11 +76,17 @@ def analyze_image(
             patient_gender=case.patient_gender,
             chief_complaint=case.chief_complaint,
         )
+        import json
+        def _safe_str(v):
+            if isinstance(v, (list, dict)):
+                return json.dumps(v, indent=2)
+            return str(v) if v is not None else ""
+
         clinical_interp = ClinicalInterpretation(
             analysis_id=analysis.id,
-            clinical_summary=interp.get("clinical_summary", ""),
-            differential_diagnosis=interp.get("differential_diagnosis", ""),
-            recommendations=interp.get("recommendations", ""),
+            clinical_summary=_safe_str(interp.get("clinical_summary", "")),
+            differential_diagnosis=_safe_str(interp.get("differential_diagnosis", "")),
+            recommendations=_safe_str(interp.get("recommendations", "")),
             gemini_raw=str(interp),
         )
         db.add(clinical_interp)
